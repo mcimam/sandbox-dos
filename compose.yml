@@ -1,0 +1,55 @@
+version: '3.9'
+
+services:
+  monitor:
+    image: louislam/uptime-kuma:1
+    ports:
+      - "3001:3001"
+    volumes:
+      - monitor_data:/app/data
+
+  app0:
+    build: 
+      context: app
+    # ports:
+    #   - "1180:5000"
+    mem_limit: 128m
+    cpus: 0.2
+  
+  app1:
+    build: 
+      context: app
+    # ports:
+    #   - "1181:5000"
+    mem_limit: 128m
+    cpus: 0.2
+  
+  defender0:
+    build: 
+      context: defender
+    ports:
+      - "1080:80"
+    volumes:
+      - ./defender/config/default.conf:/etc/nginx/conf.d/default.conf
+    mem_limit: 128m
+    cpus: 0.2
+
+
+  defender1:
+    build: 
+      context: defender
+    volumes:
+      - ./defender/config/prevent_dos.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - "1081:80"
+    mem_limit: 128m
+    cpus: 0.2
+
+  attacker:
+    build:
+      context: attacker
+    ports:
+      - "1079:5000"
+
+volumes:
+  monitor_data:
